@@ -1,2 +1,2 @@
 # ClubAssembly
-Assembly(Processador ICMC) game
+Assembly game for Processador ICMC
