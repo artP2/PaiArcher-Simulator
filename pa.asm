@@ -30,32 +30,37 @@ jmp main
 
 Pontos: var #1		; Contador de Pontos
 Forca: var #1		; Forca escolhida pelo usuario
+posPaia: var #1		; Contem a posicao atual do paia
+posAlvo: var #1 	; posicao do alvo
 
 ; Mensagens que serao impressas na tela
-Msn1: string "Precione ENTER para jogar"
-Msn2: string "exemplo2"
+;Msn1: string "Precione ENTER para jogar"
+;Msn2: string "exemplo2"
 
 
 ;---- Inicio do Programa Principal -----
 main:
 	; Inicialisa as variaveis Globais
 	loadn r0, #0
-	store Pontos, r0	; Contador de Pontos
-	store Forca, r0		; Forca escolhida pelo usuario
+	loadn r1, #799
+	store Pontos, r0	; zera contador de Pontos
+	store posAlvo, r1 	; posicao inicial do alvo
 
-	call desenhaTela
+	;call desenhaTela
 
-	call desenhaPaia
+	;call desenhaPaia
 
 	nova_fase:
+		;apagaPaia
+		loadn r0, #500
+		store Forca, r0		; zera forca escolhida pelo usuario
+		store posPaia, r0	; Zera Posicao Atual do paia
 		call desenhaAlvo
 
-		call inputForca
+		;call inputForca
 
 		em_movimento:
 			call movimentaPaia
-
-			call desenhaPaia
 
 			call verificaPosicao
 
@@ -69,3 +74,92 @@ main:
 
 
 ;---- Inicio das Subrotinas -----
+
+movimentaPaia:
+	; pra fazer uma parabola eh soh subtrair 39? ateh a metade e somar 41 apos a metade
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+
+	load r0, posPaia
+	loadn r1, #1
+	loadn r2, #' '
+	loadn r3, #'|'
+
+	outchar r2, r0
+	add r4, r0, r1
+	outchar r3, r4
+
+	store posPaia, r4
+
+	pop r0
+	pop r1
+	pop r2
+	pop r3
+	pop r4
+	rts
+
+verificaPosicao:
+	push r0
+	push r1
+
+	load r0, posPaia
+	load r1, posAlvo
+
+	; verificar se acertou o alvo
+	cmp r0, r1
+	jeq acertou
+
+	; verificar se jah passou do y do alvo posPaia > pos Alvo
+	jgr errou
+
+	; verificar se ja passou do x do alvo
+	push r2
+	push r3
+	push r4
+
+	inc r0
+	loadn r2, #40
+
+	mod r3, r1, r2
+	inc r3
+	loadn r2, #0
+	mod r4, r0, r3
+
+	cmp r2, r4
+
+	pop r2
+	pop r3
+	pop r4
+
+	jeq errou
+
+	pop r0
+	pop r1
+
+	rts
+
+errou: ; TODO resetar os pontos ou dar game over
+	pop r0
+	pop r1
+	jmp nova_fase
+
+acertou: ; incrementa a pontuacao e vai pra nova fase
+	pop r1
+	load r0, Pontos
+	inc r0
+	store Pontos, r0
+	pop r0
+	jmp nova_fase
+
+desenhaAlvo:
+	push r0
+	push r1
+	loadn r0, #'>'
+	load r1, posAlvo
+	outchar r0, r1
+	pop r0
+	pop r1
+	rts
