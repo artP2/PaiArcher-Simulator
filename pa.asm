@@ -57,8 +57,9 @@ main:
 	nova_fase:
 		;apagaPaia
 		loadn r0, #760
-		store Forca, r0		; zera forca escolhida pelo usuario
 		store posPaia, r0	; Zera Posicao Atual do paia
+		loadn r0, #40
+		store Forca, r0		; forca escolhida pelo usuario
 		call desenhaAlvo
 
 		;call inputForca
@@ -86,25 +87,20 @@ movimentaPaia:
 	push r0
 	push r1
 	push r2
-	push r3
-	push r4
 
 	load r0, posPaia
-	loadn r1, #1
-	loadn r2, #' '
-	loadn r3, #'|'
+	loadn r1, #' '
+	loadn r2, #'|'
 
+	outchar r1, r0
+	inc r0
 	outchar r2, r0
-	add r4, r0, r1
-	outchar r3, r4
 
-	store posPaia, r4
+	store posPaia, r0
 
 	pop r0
 	pop r1
 	pop r2
-	pop r3
-	pop r4
 	rts
 
 verificaPosicao:
