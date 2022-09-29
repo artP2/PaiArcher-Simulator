@@ -52,7 +52,7 @@ main:
 
 	nova_fase:
 		;apagaPaia
-		loadn r0, #500
+		loadn r0, #760
 		store Forca, r0		; zera forca escolhida pelo usuario
 		store posPaia, r0	; Zera Posicao Atual do paia
 		call desenhaAlvo
@@ -63,6 +63,8 @@ main:
 			call movimentaPaia
 
 			call verificaPosicao
+
+			call delay
 
 		jmp em_movimento
 
@@ -125,16 +127,13 @@ verificaPosicao:
 
 	mod r3, r1, r2
 	inc r3
-	loadn r2, #0
 	mod r4, r0, r3
-
-	cmp r2, r4
 
 	pop r2
 	pop r3
 	pop r4
 
-	jeq errou
+	jz errou
 
 	pop r0
 	pop r1
@@ -160,6 +159,23 @@ desenhaAlvo:
 	loadn r0, #'>'
 	load r1, posAlvo
 	outchar r0, r1
+	pop r0
+	pop r1
+	rts
+
+delay:
+	push r0
+	push r1
+
+	loadn r0, #1500
+	loop_ext:
+		loadn r1, #1000
+		loop_int:
+			dec r1
+			jnz loop_int
+		dec r0
+		jnz loop_ext
+
 	pop r0
 	pop r1
 	rts
