@@ -34,14 +34,18 @@ posPaia: var #1		; Contem a posicao atual do paia
 posAlvo: var #1 	; posicao do alvo
 
 ; Mensagens que serao impressas na tela
-;Msn1: string "Precione ENTER para jogar"
-;Msn2: string "exemplo2"
+Msn1: string "Precione ENTER para jogar"
+Msn2: string "Acertou                  "
+Msn3: string "Errou                    "
 
 
 ;---- Inicio do Programa Principal -----
 main:
 	; Inicialisa as variaveis Globais
 	loadn r0, #0
+	loadn r1, #Msn1
+	loadn r2, #256
+	call Imprimestr
 	loadn r1, #799
 	store Pontos, r0	; zera contador de Pontos
 	store posAlvo, r1 	; posicao inicial do alvo
@@ -141,12 +145,24 @@ verificaPosicao:
 	rts
 
 errou: ; TODO resetar os pontos ou dar game over
+	push r2
+	loadn r0, #0
+	loadn r1, #Msn3
+	loadn r2, #256
+	call Imprimestr
 	pop r0
 	pop r1
+	pop r2
 	jmp nova_fase
 
 acertou: ; incrementa a pontuacao e vai pra nova fase
+	push r2
+	loadn r0, #0
+	loadn r1, #Msn2
+	loadn r2, #256
+	call Imprimestr
 	pop r1
+	pop r2
 	load r0, Pontos
 	inc r0
 	store Pontos, r0
@@ -179,3 +195,37 @@ delay:
 	pop r0
 	pop r1
 	rts
+
+Imprimestr:		;  Rotina de Impresao de Mensagens:    
+				; r0 = Posicao da tela que o primeiro caractere da mensagem sera' impresso
+				; r1 = endereco onde comeca a mensagem
+				; r2 = cor da mensagem
+				; Obs: a mensagem sera' impressa ate' encontrar "/0"
+				
+;---- Empilhamento: protege os registradores utilizados na subrotina na pilha para preservar seu valor				
+	push r0	; Posicao da tela que o primeiro caractere da mensagem sera' impresso
+	push r1	; endereco onde comeca a mensagem
+	push r2	; cor da mensagem
+	push r3	; Criterio de parada
+	push r4	; Recebe o codigo do caractere da Mensagem
+	
+	loadn r3, #'\0'	; Criterio de parada
+
+ImprimestrLoop:	
+	loadi r4, r1		; aponta para a memoria no endereco r1 e busca seu conteudo em r4
+	cmp r4, r3			; compara o codigo do caractere buscado com o criterio de parada
+	jeq ImprimestrSai	; goto Final da rotina
+	add r4, r2, r4		; soma a cor (r2) no codigo do caractere em r4
+	outchar r4, r0		; imprime o caractere cujo codigo está em r4 na posicao r0 da tela
+	inc r0				; incrementa a posicao que o proximo caractere sera' escrito na tela
+	inc r1				; incrementa o ponteiro para a mensagem na memoria
+	jmp ImprimestrLoop	; goto Loop
+	
+ImprimestrSai:	
+;---- Desempilhamento: resgata os valores dos registradores utilizados na Subrotina da Pilha
+	pop r4	
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	rts		; retorno da subrotina
