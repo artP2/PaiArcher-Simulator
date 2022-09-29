@@ -30,8 +30,10 @@ jmp main
 
 Pontos: var #1		; Contador de Pontos
 Forca: var #1		; Forca escolhida pelo usuario
+forcaUtilizada: var #1	; forca jah utilizada
 posPaia: var #1		; Contem a posicao atual do paia
 posAlvo: var #1 	; posicao do alvo
+
 
 ; Mensagens que serao impressas na tela
 Msn1: string "Precione ENTER para jogar"
@@ -46,7 +48,7 @@ main:
 	loadn r1, #Msn1
 	loadn r2, #256
 	call Imprimestr
-	loadn r1, #799
+	loadn r1, #879
 	store Pontos, r0	; zera contador de Pontos
 	store posAlvo, r1 	; posicao inicial do alvo
 
@@ -56,10 +58,12 @@ main:
 
 	nova_fase:
 		;apagaPaia
-		loadn r0, #760
+		loadn r0, #840
 		store posPaia, r0	; Zera Posicao Atual do paia
 		loadn r0, #40
 		store Forca, r0		; forca escolhida pelo usuario
+		loadn r0, #0
+		store forcaUtilizada, r0 	; zera forca utilizada
 		call desenhaAlvo
 
 		;call inputForca
@@ -83,7 +87,6 @@ main:
 ;---- Inicio das Subrotinas -----
 
 movimentaPaia:
-	; pra fazer uma parabola eh soh subtrair 39? ateh a metade e somar 41 apos a metade
 	push r0
 	push r1
 	push r2
@@ -93,7 +96,39 @@ movimentaPaia:
 	loadn r2, #'|'
 
 	outchar r1, r0
+	;inc r0 ; move em linha reta
+	;mover bonito
+	push r3
+	push r4
+	push r5
+	push r6
+
+	load r3, Forca
+	load r4, forcaUtilizada
+	loadn r5, #2
+	div r6, r3, r5
+	cmp r4, r6
+	jle subir
+	jgr descer
 	inc r0
+	jmp continue
+	subir:
+		loadn r3, #39
+		sub r0, r0, r3
+		jmp continue
+	descer:
+		loadn r3, #41
+		add r0, r0, r3
+		jmp continue
+
+	continue:
+	inc r4
+	store forcaUtilizada, r4
+	pop r3
+	pop r4
+	pop r5
+	pop r6
+
 	outchar r2, r0
 
 	store posPaia, r0
