@@ -32,53 +32,37 @@ Pontos: var #1		; Contador de Pontos
 
 Forca: var #1		; Forca escolhida pelo usuario
 forcaUtilizada: var #1	; forca jah utilizada
+Angulo: var #1
 
 posPaia: var #1		; Contem a posicao atual do paia
 posAlvo: var #1 	; posicao do alvo
 
-randPosAlvo: var #30
-	static randPosAlvo + #0, #0
-	static randPosAlvo + #1, #0
-	static randPosAlvo + #2, #0
-	static randPosAlvo + #3, #0
-	static randPosAlvo + #4, #0
-	static randPosAlvo + #5, #0
-	static randPosAlvo + #6, #0
-	static randPosAlvo + #7, #0
-	static randPosAlvo + #8, #0
-	static randPosAlvo + #9, #0
-	static randPosAlvo + #10, #0
-	static randPosAlvo + #11, #0
-	static randPosAlvo + #12, #0
-	static randPosAlvo + #13, #0
-	static randPosAlvo + #14, #0
-	static randPosAlvo + #15, #0
-	static randPosAlvo + #16, #0
-	static randPosAlvo + #17, #0
-	static randPosAlvo + #18, #0
-	static randPosAlvo + #19, #0
-	static randPosAlvo + #20, #0
-	static randPosAlvo + #21, #0
-	static randPosAlvo + #22, #0
-	static randPosAlvo + #23, #0
-	static randPosAlvo + #24, #0
-	static randPosAlvo + #25, #0
-	static randPosAlvo + #26, #0
-	static randPosAlvo + #27, #0
-	static randPosAlvo + #28, #0
-	static randPosAlvo + #29, #0
+angulos: var #3
+	static angulos + #0, #0
+	static angulos + #1, #1
+	static angulos + #2, #2
+	static angulos + #3, #1
 
-forcas: var #10
-	static f1 + #0, #0
-	static f1 + #1, #1
-	static f1 + #2, #2
-	static f1 + #3, #3
-	static f1 + #4, #4
-	static f1 + #5, #5
-	static f1 + #6, #6
-	static f1 + #7, #7
-	static f1 + #8, #8
-	static f1 + #9, #9
+forcas: var #19
+	static forcas + #0, #20
+	static forcs + #1, #25
+	static forcas + #2, #30
+	static forcas + #3, #35
+	static forcas + #4, #40
+	static forcas + #5, #45
+	static forcas + #6, #50
+	static forcas + #7, #55
+	static forcas + #8, #60
+	static forcas + #9, #65
+	static forcas + #10, #60
+	static forcas + #11, #55
+	static forcas + #12, #50
+	static forcas + #13, #45
+	static forcas + #14, #40
+	static forcas + #15, #35
+	static forcas + #16, #30
+	static forcas + #17, #25
+	static forcas + #18, #20
 
 ; Mensagens que serao impressas na tela
 Msn1: string "Precione ENTER para jogar"
@@ -258,7 +242,11 @@ acertou: ; incrementa a pontuacao e vai pra nova fase
 	pop r0
 	jmp nova_fase
 
-rand: 
+posicionaAlvo:
+	push r0
+	push r1
+
+	
 
 desenhaAlvo:
 	push r0
@@ -286,6 +274,95 @@ delay:
 	pop r0
 	pop r1
 	rts
+
+DigitaLetra:	; Espera que uma tecla seja digitada e salva na variavel global "Letra"
+	push r0
+	push r1
+	loadn r1, #255	; Se nao digitar nada vem 255
+
+   DigitaLetra_Loop:
+		inchar r0			; Le o teclado, se nada for digitado = 255
+		cmp r0, r1			;compara r0 com 255
+		jeq DigLetra_Loop	; Fica lendo ate' que digite uma tecla valida
+
+	store Letra, r0			; Salva a tecla na variavel global "Letra"
+
+	pop r1
+	pop r0
+	rts
+
+selecionaForca:	; Espera que uma tecla seja digitada para selecionar a forca de lancamento
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+
+	loadn r1, #255	; Se nao digitar nada vem 255
+
+   selecionaForca_Loop:
+		inchar r0			; Le o teclado, se nada for digitado = 255
+
+		loadn r2, #forcas
+		loadi r3, r2
+		inc r2
+		
+		loadn r4, #19
+		cmp r2, r4
+
+		jne selecionaForca_Loop_Skip
+		loadn r2, #0
+
+	selecionaForca_Loop_Skip:
+		cmp r0, r1			;compara r0 com 255
+
+		jeq DigLetra_Loop	; Fica lendo ate' que digite uma tecla valida
+
+	store Forca, r0			; Salva a tecla na variavel global "Letra"
+
+	pop r4
+	pop r3	
+	pop r2
+	pop r1
+	pop r0
+	rts
+
+selecionaAngulo:	; Espera que uma tecla seja digitada para selecionar a forca de lancamento
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+
+	loadn r1, #255	; Se nao digitar nada vem 255
+
+   selecionaAngulo_Loop:
+		inchar r0			; Le o teclado, se nada for digitado = 255
+
+		loadn r2, #angulos
+		loadi r3, r2
+		inc r2
+		
+		loadn r4, #3
+		cmp r2, r4
+
+		jne selecionaForca_Loop_Skip
+		loadn r2, #0
+
+	selecionaAngulo_Loop_Skip:
+		cmp r0, r1			;compara r0 com 255
+
+		jeq DigLetra_Loop	; Fica lendo ate' que digite uma tecla valida
+
+	store Angulo, r0			; Salva a tecla na variavel global "Letra"
+
+	pop r4
+	pop r3	
+	pop r2
+	pop r1
+	pop r0
+	rts
+
 
 Imprimestr:		;  Rotina de Impresao de Mensagens:    
 				; r0 = Posicao da tela que o primeiro caractere da mensagem sera' impresso
