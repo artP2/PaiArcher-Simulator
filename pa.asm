@@ -28,9 +28,40 @@ jmp main
 ; As variaveis locais de cada funcao serao alocadas nos Registradores internos = r0 - r7
 
 Pontos: var #1		; Contador de Pontos
+
 Forca: var #1		; Forca escolhida pelo usuario
 forcaUtilizada: var #1	; forca jah utilizada
+Angulo: var #1
+
 posPaia: var #1		; Contem a posicao atual do paia
+
+angulos: var #3
+	static angulos + #0, #0
+	static angulos + #1, #1
+	static angulos + #2, #2
+	static angulos + #3, #1
+
+forcas: var #19
+	static forcas + #0, #20
+	static forcs + #1, #25
+	static forcas + #2, #30
+	static forcas + #3, #35
+	static forcas + #4, #40
+	static forcas + #5, #45
+	static forcas + #6, #50
+	static forcas + #7, #55
+	static forcas + #8, #60
+	static forcas + #9, #65
+	static forcas + #10, #60
+	static forcas + #11, #55
+	static forcas + #12, #50
+	static forcas + #13, #45
+	static forcas + #14, #40
+	static forcas + #15, #35
+	static forcas + #16, #30
+	static forcas + #17, #25
+	static forcas + #18, #20
+
 Angulo: var #1 		; angulo escolhido pelo usuario
 cabecaPosition: var #1 	; posicao do alvo
 
@@ -42,6 +73,7 @@ Msn3: string "Errou                    "
 
 ;---- Inicio do Programa Principal -----
 main:
+
 	; Inicialisa as variaveis Globais
 	store Pontos, r0	; zera contador de Pontos
 	loadn r1, #635
@@ -182,6 +214,19 @@ verificaPosicao:
 
 	rts
 
+;
+;        loadn R2, #rand
+;        load R1, IncRand
+;
+;
+;
+;
+;
+;
+;
+;
+;
+
 errou: ; TODO resetar os pontos ou dar game over
 	push r2
 	loadn r0, #0
@@ -223,6 +268,95 @@ delay:
 	pop r0
 	pop r1
 	rts
+
+DigitaLetra:	; Espera que uma tecla seja digitada e salva na variavel global "Letra"
+	push r0
+	push r1
+	loadn r1, #255	; Se nao digitar nada vem 255
+
+   DigitaLetra_Loop:
+		inchar r0			; Le o teclado, se nada for digitado = 255
+		cmp r0, r1			;compara r0 com 255
+		jeq DigLetra_Loop	; Fica lendo ate' que digite uma tecla valida
+
+	store Letra, r0			; Salva a tecla na variavel global "Letra"
+
+	pop r1
+	pop r0
+	rts
+
+selecionaForca:	; Espera que uma tecla seja digitada para selecionar a forca de lancamento
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+
+	loadn r1, #255	; Se nao digitar nada vem 255
+
+   selecionaForca_Loop:
+		inchar r0			; Le o teclado, se nada for digitado = 255
+
+		loadn r2, #forcas
+		loadi r3, r2
+		inc r2
+		
+		loadn r4, #19
+		cmp r2, r4
+
+		jne selecionaForca_Loop_Skip
+		loadn r2, #0
+
+	selecionaForca_Loop_Skip:
+		cmp r0, r1			;compara r0 com 255
+
+		jeq DigLetra_Loop	; Fica lendo ate' que digite uma tecla valida
+
+	store Forca, r0			; Salva a tecla na variavel global "Letra"
+
+	pop r4
+	pop r3	
+	pop r2
+	pop r1
+	pop r0
+	rts
+
+selecionaAngulo:	; Espera que uma tecla seja digitada para selecionar a forca de lancamento
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+
+	loadn r1, #255	; Se nao digitar nada vem 255
+
+   selecionaAngulo_Loop:
+		inchar r0			; Le o teclado, se nada for digitado = 255
+
+		loadn r2, #angulos
+		loadi r3, r2
+		inc r2
+		
+		loadn r4, #3
+		cmp r2, r4
+
+		jne selecionaForca_Loop_Skip
+		loadn r2, #0
+
+	selecionaAngulo_Loop_Skip:
+		cmp r0, r1			;compara r0 com 255
+
+		jeq DigLetra_Loop	; Fica lendo ate' que digite uma tecla valida
+
+	store Angulo, r0			; Salva a tecla na variavel global "Letra"
+
+	pop r4
+	pop r3	
+	pop r2
+	pop r1
+	pop r0
+	rts
+
 
 Imprimestr:		;  Rotina de Impresao de Mensagens:    
 				; r0 = Posicao da tela que o primeiro caractere da mensagem sera' impresso
