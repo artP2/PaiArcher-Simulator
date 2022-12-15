@@ -29,11 +29,56 @@ jmp main
 ; As variaveis locais de cada funcao serao alocadas nos Registradores internos = r0 - r7
 
 Pontos: var #1		; Contador de Pontos
+
 Forca: var #1		; Forca escolhida pelo usuario
 forcaUtilizada: var #1	; forca jah utilizada
+
 posPaia: var #1		; Contem a posicao atual do paia
 posAlvo: var #1 	; posicao do alvo
 
+randPosAlvo: var #30
+	static randPosAlvo + #0, #0
+	static randPosAlvo + #1, #0
+	static randPosAlvo + #2, #0
+	static randPosAlvo + #3, #0
+	static randPosAlvo + #4, #0
+	static randPosAlvo + #5, #0
+	static randPosAlvo + #6, #0
+	static randPosAlvo + #7, #0
+	static randPosAlvo + #8, #0
+	static randPosAlvo + #9, #0
+	static randPosAlvo + #10, #0
+	static randPosAlvo + #11, #0
+	static randPosAlvo + #12, #0
+	static randPosAlvo + #13, #0
+	static randPosAlvo + #14, #0
+	static randPosAlvo + #15, #0
+	static randPosAlvo + #16, #0
+	static randPosAlvo + #17, #0
+	static randPosAlvo + #18, #0
+	static randPosAlvo + #19, #0
+	static randPosAlvo + #20, #0
+	static randPosAlvo + #21, #0
+	static randPosAlvo + #22, #0
+	static randPosAlvo + #23, #0
+	static randPosAlvo + #24, #0
+	static randPosAlvo + #25, #0
+	static randPosAlvo + #26, #0
+	static randPosAlvo + #27, #0
+	static randPosAlvo + #28, #0
+	static randPosAlvo + #29, #0
+
+forcas: var #10
+	static f1 + #0, #0
+	static f1 + #1, #1
+	static f1 + #2, #2
+	static f1 + #3, #3
+	static f1 + #4, #4
+	static f1 + #5, #5
+	static f1 + #6, #6
+	static f1 + #7, #7
+	static f1 + #8, #8
+	static f1 + #9, #9
 
 ; Mensagens que serao impressas na tela
 Msn1: string "Precione ENTER para jogar"
@@ -43,7 +88,7 @@ Msn3: string "Errou                    "
 
 ;---- Inicio do Programa Principal -----
 main:
-	; Inicialisa as variaveis Globais
+	; Inicializa as variaveis Globais
 	loadn r0, #0
 	loadn r1, #Msn1
 	loadn r2, #256
@@ -175,6 +220,19 @@ verificaPosicao:
 
 	rts
 
+;
+;        loadn R2, #rand
+;        load R1, IncRand
+;
+;
+;
+;
+;
+;
+;
+;
+;
+
 errou: ; TODO resetar os pontos ou dar game over
 	push r2
 	loadn r0, #0
@@ -199,6 +257,8 @@ acertou: ; incrementa a pontuacao e vai pra nova fase
 	store Pontos, r0
 	pop r0
 	jmp nova_fase
+
+rand: 
 
 desenhaAlvo:
 	push r0
