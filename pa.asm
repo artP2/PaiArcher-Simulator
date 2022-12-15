@@ -28,14 +28,14 @@ jmp main
 ; As variaveis locais de cada funcao serao alocadas nos Registradores internos = r0 - r7
 
 Pontos: var #1		; Contador de Pontos
+Letra: var #1 		; salva input do usuario
 
 Forca: var #1		; Forca escolhida pelo usuario
 forcaUtilizada: var #1	; forca jah utilizada
-Angulo: var #1
 
 posPaia: var #1		; Contem a posicao atual do paia
 
-angulos: var #3
+angulos: var #4
 	static angulos + #0, #0
 	static angulos + #1, #1
 	static angulos + #2, #2
@@ -43,7 +43,7 @@ angulos: var #3
 
 forcas: var #19
 	static forcas + #0, #20
-	static forcs + #1, #25
+	static forcas + #1, #25
 	static forcas + #2, #30
 	static forcas + #3, #35
 	static forcas + #4, #40
@@ -277,7 +277,7 @@ DigitaLetra:	; Espera que uma tecla seja digitada e salva na variavel global "Le
    DigitaLetra_Loop:
 		inchar r0			; Le o teclado, se nada for digitado = 255
 		cmp r0, r1			;compara r0 com 255
-		jeq DigLetra_Loop	; Fica lendo ate' que digite uma tecla valida
+		jeq DigitaLetra_Loop	; Fica lendo ate' que digite uma tecla valida
 
 	store Letra, r0			; Salva a tecla na variavel global "Letra"
 
@@ -310,7 +310,7 @@ selecionaForca:	; Espera que uma tecla seja digitada para selecionar a forca de 
 	selecionaForca_Loop_Skip:
 		cmp r0, r1			;compara r0 com 255
 
-		jeq DigLetra_Loop	; Fica lendo ate' que digite uma tecla valida
+		jeq DigitaLetra_Loop	; Fica lendo ate' que digite uma tecla valida
 
 	store Forca, r0			; Salva a tecla na variavel global "Letra"
 
@@ -346,7 +346,7 @@ selecionaAngulo:	; Espera que uma tecla seja digitada para selecionar a forca de
 	selecionaAngulo_Loop_Skip:
 		cmp r0, r1			;compara r0 com 255
 
-		jeq DigLetra_Loop	; Fica lendo ate' que digite uma tecla valida
+		jeq DigitaLetra_Loop	; Fica lendo ate' que digite uma tecla valida
 
 	store Angulo, r0			; Salva a tecla na variavel global "Letra"
 
