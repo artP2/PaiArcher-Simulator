@@ -75,6 +75,7 @@ Msn3: string "Errou                    "
 main:
 
 	; Inicialisa as variaveis Globais
+	loadn r0, #48
 	store Pontos, r0	; zera contador de Pontos
 	loadn r1, #635
 	store cabecaPosition, r1 	; posicao inicial do alvo
@@ -90,12 +91,21 @@ main:
 		store forcaUtilizada, r0 	; zera forca utilizada
 		call printScreenScreen
 		call printcabeca
+
+		; printar msg de ajuda
 		loadn r0, #0
 		loadn r1, #Msn1
 		loadn r2, #256
 		call Imprimestr
 
-		call inputForca
+		; printar pontuacao
+		loadn r0, #927
+		load r1, Pontos
+		outchar r1, r0 
+
+
+		call selecionaForca
+		call selecionaAngulo
 
 		em_movimento:
 			call movimentaPaia
@@ -114,10 +124,6 @@ main:
 
 
 ;---- Inicio das Subrotinas -----
-
-inputForca:
-
-; fim inputForca
 
 movimentaPaia:
 	push r0
@@ -310,7 +316,7 @@ selecionaForca:	; Espera que uma tecla seja digitada para selecionar a forca de 
 	selecionaForca_Loop_Skip:
 		cmp r0, r1			;compara r0 com 255
 
-		jeq DigitaLetra_Loop	; Fica lendo ate' que digite uma tecla valida
+		jeq selecionaForca_Loop	; Fica lendo ate' que digite uma tecla valida
 
 	store Forca, r0			; Salva a tecla na variavel global "Letra"
 
@@ -346,7 +352,7 @@ selecionaAngulo:	; Espera que uma tecla seja digitada para selecionar a forca de
 	selecionaAngulo_Loop_Skip:
 		cmp r0, r1			;compara r0 com 255
 
-		jeq DigitaLetra_Loop	; Fica lendo ate' que digite uma tecla valida
+		jeq selecionaAngulo_Loop	; Fica lendo ate' que digite uma tecla valida
 
 	store Angulo, r0			; Salva a tecla na variavel global "Letra"
 
