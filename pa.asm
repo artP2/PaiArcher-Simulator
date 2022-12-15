@@ -64,6 +64,7 @@ forcas: var #19
 	static forcas + #17, #25
 	static forcas + #18, #20
 
+
 ; Mensagens que serao impressas na tela
 Msn1: string "Precione ENTER para jogar"
 Msn2: string "Acertou                  "
