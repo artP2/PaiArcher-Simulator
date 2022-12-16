@@ -83,10 +83,8 @@ main:
 	nova_fase:
 		loadn r0, #603
 		store posPaia, r0	; Zera Posicao Atual do paia
-		loadn r0, #29
+		loadn r0, #27
 		store Forca, r0		; forca escolhida pelo usuario
-		loadn r0, #1
-		store Angulo, r0		; forca escolhida pelo usuario
 		loadn r0, #0
 		store forcaUtilizada, r0 	; zera forca utilizada
 		call printScreenScreen
@@ -104,8 +102,9 @@ main:
 		outchar r1, r0 
 
 
-		call selecionaForca
-		call selecionaAngulo
+		;call selecionaForca
+		;call selecionaAngulo
+		call escolherAngulo
 
 		em_movimento:
 			call movimentaPaia
@@ -121,6 +120,80 @@ main:
 	halt	; Nunca chega aqui !!! Mas nao custa nada colocar!!!!
 	
 ;---- Fim do Programa Principal -----
+
+delay_input:
+	push r5
+	push r6
+	;push r7
+	;loadn r7, #255
+	loadn r5, #1500
+	
+	delay_input_ext:
+		loadn r6, #1500
+		delay_input_int:
+			inchar r0			; Le o teclado, se nada for digitado = 255
+			cmp r0, r7			;compara r0 com 255
+			jne delay_input_fim
+			dec r6
+			jnz delay_input_int
+		; fim delay_input_int
+		dec r5
+		jz delay_input_fim
+		jmp delay_input_ext
+	; fim delay_input_ext
+	delay_input_fim:
+		pop r5
+		pop r6
+		;pop r7
+		rts
+	; fim delay_input_fim
+; fim delay_input
+
+escolherAngulo:	; Espera que uma tecla seja digitada e salva na variavel global "Letra"
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r7
+	loadn r7, #255
+	loadn r1, #3 	; limite maximo do angulo -1
+	loadn r2, #49 	; 1 em ascii
+	loadn r3, #1031 	; posicao do angulo
+	loadn r4, #1 	; valor do angulo
+
+   	escolherAngulo_Loop_up:
+		cmp r4, r1
+		jeq escolherAngulo_Loop_down 
+		inc r4
+		inc r2
+		outchar r2, r3
+		call delay_input
+		cmp r0, r7			;compara r0 com 255
+		jeq escolherAngulo_Loop_up	; Fica lendo ate' que digite uma tecla valida
+		jmp escolherAngulo_fim
+
+   	escolherAngulo_Loop_down:
+		dec r2
+		dec r4
+		jz escolherAngulo_Loop_up
+		outchar r2, r3
+		call delay_input
+		cmp r0, r7			;compara r0 com 255
+		jeq escolherAngulo_Loop_down	; Fica lendo ate' que digite uma tecla valida
+		jmp escolherAngulo_fim
+	
+
+	escolherAngulo_fim:
+	store Angulo, r4			; Salva a tecla na variavel global "Letra"
+
+	pop r7
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	rts
 
 
 ;---- Inicio das Subrotinas -----
@@ -297,10 +370,16 @@ selecionaForca:	; Espera que uma tecla seja digitada para selecionar a forca de 
 	push r2
 	push r3
 	push r4
+	;push r5 ; mostrar forca
+	;push r6 ;
+
+	;loadn r5, #49
+	;loadn r6, #991
 
 	loadn r1, #255	; Se nao digitar nada vem 255
 
    selecionaForca_Loop:
+   		;outchar r5, r6
 		inchar r0			; Le o teclado, se nada for digitado = 255
 
 		loadn r2, #forcas
@@ -312,6 +391,7 @@ selecionaForca:	; Espera que uma tecla seja digitada para selecionar a forca de 
 
 		jne selecionaForca_Loop_Skip
 		loadn r2, #0
+		;inc r5
 
 	selecionaForca_Loop_Skip:
 		cmp r0, r1			;compara r0 com 255
@@ -320,6 +400,8 @@ selecionaForca:	; Espera que uma tecla seja digitada para selecionar a forca de 
 
 	store Forca, r0			; Salva a tecla na variavel global "Letra"
 
+	;pop r6
+	;pop r5
 	pop r4
 	pop r3	
 	pop r2
