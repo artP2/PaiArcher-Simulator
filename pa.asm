@@ -35,14 +35,7 @@ forcaUtilizada: var #1	; forca jah utilizada
 
 posPaia: var #1		; Contem a posicao atual do paia
 
-angulos: var #4
-	static angulos + #0, #0
-	static angulos + #1, #1
-	static angulos + #2, #2
-	static angulos + #3, #1
-
-forcas: var #19
-	static forcas + #0, #20
+forcas: var #9
 	static forcas + #1, #25
 	static forcas + #2, #30
 	static forcas + #3, #35
@@ -52,15 +45,6 @@ forcas: var #19
 	static forcas + #7, #55
 	static forcas + #8, #60
 	static forcas + #9, #65
-	static forcas + #10, #60
-	static forcas + #11, #55
-	static forcas + #12, #50
-	static forcas + #13, #45
-	static forcas + #14, #40
-	static forcas + #15, #35
-	static forcas + #16, #30
-	static forcas + #17, #25
-	static forcas + #18, #20
 
 Angulo: var #1 		; angulo escolhido pelo usuario
 cabecaPosition: var #1 	; posicao do alvo
@@ -102,9 +86,8 @@ main:
 		outchar r1, r0 
 
 
-		;call selecionaForca
-		;call selecionaAngulo
-		call escolherAngulo
+		call selecionaForca
+		call selecionaAngulo
 
 		em_movimento:
 			call movimentaPaia
@@ -121,79 +104,7 @@ main:
 	
 ;---- Fim do Programa Principal -----
 
-delay_input:
-	push r5
-	push r6
-	;push r7
-	;loadn r7, #255
-	loadn r5, #1500
-	
-	delay_input_ext:
-		loadn r6, #1500
-		delay_input_int:
-			inchar r0			; Le o teclado, se nada for digitado = 255
-			cmp r0, r7			;compara r0 com 255
-			jne delay_input_fim
-			dec r6
-			jnz delay_input_int
-		; fim delay_input_int
-		dec r5
-		jz delay_input_fim
-		jmp delay_input_ext
-	; fim delay_input_ext
-	delay_input_fim:
-		pop r5
-		pop r6
-		;pop r7
-		rts
-	; fim delay_input_fim
-; fim delay_input
 
-escolherAngulo:	; Espera que uma tecla seja digitada e salva na variavel global "Letra"
-	push r0
-	push r1
-	push r2
-	push r3
-	push r4
-	push r7
-	loadn r7, #255
-	loadn r1, #3 	; limite maximo do angulo -1
-	loadn r2, #49 	; 1 em ascii
-	loadn r3, #1031 	; posicao do angulo
-	loadn r4, #1 	; valor do angulo
-
-   	escolherAngulo_Loop_up:
-		cmp r4, r1
-		jeq escolherAngulo_Loop_down 
-		inc r4
-		inc r2
-		outchar r2, r3
-		call delay_input
-		cmp r0, r7			;compara r0 com 255
-		jeq escolherAngulo_Loop_up	; Fica lendo ate' que digite uma tecla valida
-		jmp escolherAngulo_fim
-
-   	escolherAngulo_Loop_down:
-		dec r2
-		dec r4
-		jz escolherAngulo_Loop_up
-		outchar r2, r3
-		call delay_input
-		cmp r0, r7			;compara r0 com 255
-		jeq escolherAngulo_Loop_down	; Fica lendo ate' que digite uma tecla valida
-		jmp escolherAngulo_fim
-	
-
-	escolherAngulo_fim:
-	store Angulo, r4			; Salva a tecla na variavel global "Letra"
-
-	pop r7
-	pop r4
-	pop r3
-	pop r2
-	pop r1
-	pop r0
-	rts
 
 
 ;---- Inicio das Subrotinas -----
@@ -293,18 +204,6 @@ verificaPosicao:
 
 	rts
 
-;
-;        loadn R2, #rand
-;        load R1, IncRand
-;
-;
-;
-;
-;
-;
-;
-;
-;
 
 errou: ; TODO resetar os pontos ou dar game over
 	push r2
@@ -348,98 +247,125 @@ delay:
 	pop r1
 	rts
 
-DigitaLetra:	; Espera que uma tecla seja digitada e salva na variavel global "Letra"
-	push r0
-	push r1
-	loadn r1, #255	; Se nao digitar nada vem 255
 
-   DigitaLetra_Loop:
-		inchar r0			; Le o teclado, se nada for digitado = 255
-		cmp r0, r1			;compara r0 com 255
-		jeq DigitaLetra_Loop	; Fica lendo ate' que digite uma tecla valida
-
-	store Letra, r0			; Salva a tecla na variavel global "Letra"
-
-	pop r1
-	pop r0
-	rts
-
-selecionaForca:	; Espera que uma tecla seja digitada para selecionar a forca de lancamento
+selecionaForca:	
 	push r0
 	push r1
 	push r2
 	push r3
 	push r4
-	;push r5 ; mostrar forca
-	;push r6 ;
+	push r7
+	loadn r7, #255 	; char null
+	loadn r1, #9 	; limite maximo da forca
+	loadn r2, #48 	; 1 em ascii
+	loadn r3, #991 	; posicao do forca
+	loadn r4, #0 	; valor do forca
 
-	;loadn r5, #49
-	;loadn r6, #991
+   	selecionaForca_Loop_up:
+		cmp r4, r1
+		jeq selecionaForca_Loop_down 	; if (valor == limite) jmp loop down 
+		inc r4 				; valor++
+		inc r2 				; char out ++
+		outchar r2, r3 			; printar a forca em 991
+		call delay_input 		; chamar input com delay
+		cmp r0, r7			;compara r0 com 255
+		jeq selecionaForca_Loop_up	; Fica lendo ate' que digite uma tecla valida
+		jmp selecionaForca_fim
 
-	loadn r1, #255	; Se nao digitar nada vem 255
+   	selecionaForca_Loop_down:
+		dec r2
+		dec r4
+		jz selecionaForca_Loop_up
+		outchar r2, r3
+		call delay_input
+		cmp r0, r7			;compara r0 com 255
+		jeq selecionaForca_Loop_down	; Fica lendo ate' que digite uma tecla valida
+		jmp selecionaForca_fim
+	
 
-   selecionaForca_Loop:
-   		;outchar r5, r6
-		inchar r0			; Le o teclado, se nada for digitado = 255
+	selecionaForca_fim:
+	loadn r2, #forcas
+	add r2, r2, r4
+	loadi r4, r2
+	store Forca, r4			; Salva a tecla na variavel global "Letra"
 
-		loadn r2, #forcas
-		loadi r3, r2
-		inc r2
-		
-		loadn r4, #19
-		cmp r2, r4
-
-		jne selecionaForca_Loop_Skip
-		loadn r2, #0
-		;inc r5
-
-	selecionaForca_Loop_Skip:
-		cmp r0, r1			;compara r0 com 255
-
-		jeq selecionaForca_Loop	; Fica lendo ate' que digite uma tecla valida
-
-	store Forca, r0			; Salva a tecla na variavel global "Letra"
-
-	;pop r6
-	;pop r5
+	pop r7
 	pop r4
-	pop r3	
+	pop r3
 	pop r2
 	pop r1
 	pop r0
 	rts
 
-selecionaAngulo:	; Espera que uma tecla seja digitada para selecionar a forca de lancamento
+delay_input:
+	push r5
+	push r6
+	;push r7
+	;loadn r7, #255
+	loadn r5, #1500
+	
+	delay_input_ext:
+		loadn r6, #1500
+		delay_input_int:
+			inchar r0			; Le o teclado, se nada for digitado = 255
+			cmp r0, r7			;compara r0 com 255
+			jne delay_input_fim
+			dec r6
+			jnz delay_input_int
+		; fim delay_input_int
+		dec r5
+		jz delay_input_fim
+		jmp delay_input_ext
+	; fim delay_input_ext
+	delay_input_fim:
+		pop r5
+		pop r6
+		;pop r7
+		rts
+	; fim delay_input_fim
+; fim delay_input
+
+selecionaAngulo:	
 	push r0
 	push r1
 	push r2
 	push r3
 	push r4
+	push r7
+	loadn r7, #255
+	loadn r1, #3 	; limite maximo do angulo -1
+	loadn r2, #49 	; 1 em ascii
+	loadn r3, #1031 	; posicao do angulo
+	loadn r4, #1 	; valor do angulo
 
-	loadn r1, #255	; Se nao digitar nada vem 255
-
-   selecionaAngulo_Loop:
-		inchar r0			; Le o teclado, se nada for digitado = 255
-
-		loadn r2, #angulos
-		loadi r3, r2
+   	selecionaAngulo_Loop_up:
+		cmp r4, r1
+		jeq selecionaAngulo_Loop_down 
+		inc r4
 		inc r2
-		
-		loadn r4, #3
-		cmp r2, r4
+		outchar r2, r3
+		call delay_input
+		cmp r0, r7			;compara r0 com 255
+		jeq selecionaAngulo_Loop_up	; Fica lendo ate' que digite uma tecla valida
+		jmp selecionaAngulo_fim
 
-		jne selecionaForca_Loop_Skip
-		loadn r2, #0
+   	selecionaAngulo_Loop_down:
+		dec r2
+		dec r4
+		jz selecionaAngulo_Loop_up
+		outchar r2, r3
+		call delay_input
+		cmp r0, r7			;compara r0 com 255
+		jeq selecionaAngulo_Loop_down	; Fica lendo ate' que digite uma tecla valida
+		jmp selecionaAngulo_fim
+	
 
-	selecionaAngulo_Loop_Skip:
-		cmp r0, r1			;compara r0 com 255
+	selecionaAngulo_fim:
+	store Angulo, r4			; Salva a tecla na variavel global "Letra"
 
-		jeq selecionaAngulo_Loop	; Fica lendo ate' que digite uma tecla valida
-
-	store Angulo, r0			; Salva a tecla na variavel global "Letra"
-
+	pop r7
 	pop r4
-	pop r3	
+	pop r3
 	pop r2
 	pop r1
 	pop r0
