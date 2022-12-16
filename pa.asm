@@ -36,23 +36,34 @@ forcaUtilizada: var #1	; forca jah utilizada
 posPaia: var #1		; Contem a posicao atual do paia
 
 forcas: var #9
-	static forcas + #1, #25
-	static forcas + #2, #30
-	static forcas + #3, #35
-	static forcas + #4, #40
-	static forcas + #5, #45
-	static forcas + #6, #50
-	static forcas + #7, #55
-	static forcas + #8, #60
-	static forcas + #9, #65
+	static forcas + #1, #20
+	static forcas + #2, #25
+	static forcas + #3, #30
+	static forcas + #4, #35
+	static forcas + #5, #40
+	static forcas + #6, #45
+	static forcas + #7, #50
+	static forcas + #8, #55
+	static forcas + #9, #60
+
+paias: var #4
+	static forcas + #1, '|'
+	static forcas + #2, '/'
+	static forcas + #3, '-'
+	static forcas + #4, '\'
+	
 
 Angulo: var #1 		; angulo escolhido pelo usuario
 cabecaPosition: var #1 	; posicao do alvo
 
 ; Mensagens que serao impressas na tela
-Msn1: string "Precione ENTER para jogar"
-Msn2: string "Acertou                  "
-Msn3: string "Errou                    "
+Msn1: string "Aperte uma tecla para jogar           "
+Msn2: string "Aperte uma tecla para CONTINUAR       "
+Msn3: string "Aperte uma tecla para REINICIAR       "
+Msn4: string "Aperte uma tecla para definir a FORCA "
+Msn5: string "Aperte uma tecla para definir o ANGULO"
+Msn6: string "Acertou"
+Msn7: string "Errou"
 
 
 ;---- Inicio do Programa Principal -----
@@ -61,14 +72,12 @@ main:
 	; Inicialisa as variaveis Globais
 	loadn r0, #48
 	store Pontos, r0	; zera contador de Pontos
-	loadn r1, #635
+	loadn r1, #555
 	store cabecaPosition, r1 	; posicao inicial do alvo
 
 	nova_fase:
 		loadn r0, #603
 		store posPaia, r0	; Zera Posicao Atual do paia
-		loadn r0, #27
-		store Forca, r0		; forca escolhida pelo usuario
 		loadn r0, #0
 		store forcaUtilizada, r0 	; zera forca utilizada
 		call printScreenScreen
@@ -86,7 +95,18 @@ main:
 		outchar r1, r0 
 
 
+		; printar msg de ajuda
+		loadn r0, #0
+		loadn r1, #Msn4
+		loadn r2, #256
+		call Imprimestr
 		call selecionaForca
+
+		; printar msg de ajuda
+		loadn r0, #0
+		loadn r1, #Msn5
+		loadn r2, #256
+		call Imprimestr
 		call selecionaAngulo
 
 		em_movimento:
@@ -113,17 +133,15 @@ movimentaPaia:
 	push r0
 	push r1
 	push r2
-
-	load r0, posPaia
-	loadn r1, #' '
-	loadn r2, #'|'
-
-	outchar r1, r0
-	;mover bonito
 	push r3
 	push r4
 	push r5
 	push r6
+
+	; apagar o paia
+	load r0, posPaia
+	loadn r1, #' ' 
+	outchar r1, r0
 
 	load r3, Forca
 	load r4, forcaUtilizada
@@ -154,11 +172,9 @@ movimentaPaia:
 
 	continue:
 		store forcaUtilizada, r4
-		pop r3
-		pop r4
-		pop r5
-		pop r6
 
+		; desenhar o paia
+		loadn r2, #'|'
 		outchar r2, r0
 
 		store posPaia, r0
@@ -166,6 +182,10 @@ movimentaPaia:
 		pop r0
 		pop r1
 		pop r2
+		pop r3
+		pop r4
+		pop r5
+		pop r6
 		rts
 	; fim continue
 ; fim movimentaPaia
@@ -186,6 +206,7 @@ verificaPosicao:
 
 	; verificar se x saiu da tela
 	loadn r1, #800
+	cmp r0, r1
 	jgr errou
 
 	; verificar se o y ta acima da tela
@@ -193,7 +214,7 @@ verificaPosicao:
 	cmp r0, r1
 	jle errou
 
-	; verificar se ja passou do x do alvo
+	; verificar se vai sair da tela em x
 	inc r0 		; pos++
 	mod r0, r0,r1
 
@@ -204,30 +225,67 @@ verificaPosicao:
 
 	rts
 
+espera_input:
+	push r0
+	push r1
+	
+	loadn r1, #255
+	espera_input_loop:
+		inchar r0			; Le o teclado, se nada for digitado = 255
+		cmp r0, r1			;compara r0 com 255
+		jeq espera_input_loop
+
+	pop r1
+	pop r0
+	rts
 
 errou: ; TODO resetar os pontos ou dar game over
 	push r2
+
+	; printar msg de ajuda
 	loadn r0, #0
 	loadn r1, #Msn3
 	loadn r2, #256
 	call Imprimestr
+
+	loadn r0, #603
+	loadn r1, #Msn7
+	loadn r2, #256
+	call Imprimestr 	; printar "errou"
+
+	loadn r0, #48
+	store Pontos, r0 	; pontos = 0
+
 	pop r0
 	pop r1
 	pop r2
+
+	call espera_input
 	jmp nova_fase
 
 acertou: ; incrementa a pontuacao e vai pra nova fase
 	push r2
+
+	; printar msg de ajuda
 	loadn r0, #0
 	loadn r1, #Msn2
 	loadn r2, #256
 	call Imprimestr
-	pop r1
-	pop r2
+
+	loadn r0, #603
+	loadn r1, #Msn6
+	loadn r2, #256
+	call Imprimestr 	; printar "acertou"
+
 	load r0, Pontos
 	inc r0
-	store Pontos, r0
+	store Pontos, r0 	; pontos++
+
 	pop r0
+	pop r1
+	pop r2
+
+	call espera_input
 	jmp nova_fase
 
 delay:
