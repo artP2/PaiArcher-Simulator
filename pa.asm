@@ -1,24 +1,45 @@
 ; Simulador de arremeso de paieiro
 
 ;main:
-;	Call desenhaTela
-;	Call desenhaPaia
+; 	fase inicial
 ;	nova_fase:
-;		Call desenhaAlvo
-;		Call inputForca
-;		emMovimento:
+;		desenhar coisas na tela
+;		call selecionaForca 	-> delay_input
+; 		call selecionaAngulo 	-> delay_input
+;		em_movimento:
 ;			call movimentaPaia
-;			call desenhaPaia
-;			call verificaPosicao
-;			jmp emMovimento
+;			call verificaPosicao 	-> errou, acertou
+; 			call delay
+;			jmp em_movimento
 ;		jmp nova_fase
 ;	Halt
 
-; desenhaTela: desenha o fundo e o arremessador
-; desenhaPaia: desenha o paia, com rotacao dps
-; inputForca: oscila a forca pro usuario escolher
-; movimentaPaia: desloca o paia em x e y
-; verificaPosicao: verifica se o paia esta no x do alvo, se sim verifica se acertou o y, se o x for maior ele encerra
+; errou -> espera_input
+; acertou -> espera_input_rand
+
+; fase inicial: seta valores para a primeira fase
+; nova_fase: seta valores iniciais e chama as subrotinas
+; selecionaForca: fica rodando uma lista de forcas ate o usuario para-la
+; selecionaAngulo: fuca rodando uma lista de angulos ate o usuario para-la
+; em_movimento: loop pra chamar as subrotinas de movimento
+; movimentaPaia: movimenta o paia e o gira
+; verificaPosicao: verifica se o paia acertou ou saiu da tela
+; delay: fica enrolando um pouco
+
+; Funcoes auxiliares:
+; delay_input: fica enrolando um pouco, mas se o usuario der input ela para, retornar input em r0
+; errou: reseta os pontos, printa a cabeca triste e depois fica esperando input do usuario
+; acertou: incrementa os pontos, acende o paia e fica esperando input do usuario enquanto gera uma posicao aleatoria
+; espera_input: fica esperando input do usuario
+; espera_input_rand: fica esperando input do usuario, equanto gera uma posicao aleatoria
+
+; Funcoes de print:
+; Imprimestr(posicao r0, msg r1, cor r2): imprime uma string
+; printcabeca: printa cabeca normal
+; apagarcabeca: apaga a cabeca
+; printcabecapaia: printa a cabeca com o paia
+; printcabecatriste: printa a cabeca triste
+; printScreenScreen: printa o cenario
 
 
 jmp main
@@ -35,6 +56,7 @@ forcaUtilizada: var #1	; forca jah utilizada
 
 posPaia: var #1		; Contem a posicao atual do paia
 
+; niveis de forca
 forcas: var #9
 	static forcas + #1, #20
 	static forcas + #2, #25
@@ -46,17 +68,19 @@ forcas: var #9
 	static forcas + #8, #55
 	static forcas + #9, #60
 
+; desenhos do paia girando
 paias: var #4
 	static paias + #0, #124 	;'|'
 	static paias + #1, #47 		;'/'
 	static paias + #2, #45 		;'-'
 	static paias + #3, #92 		;'\'
 	
-framePaia: var #1
+framePaia: var #1 	; frame que a ser desenhado no momento
 
 Angulo: var #1 		; angulo escolhido pelo usuario
 cabecaPosition: var #1 	; posicao do alvo
 
+; posicoes a serem sorteadas para o alvo
 pos: var #20 ; das linhas 0 a 19 e colunas 20 a 39
 	static pos + #0, #555
 	static pos + #1, #551
@@ -94,16 +118,19 @@ main:
 
 	; Inicialisa as variaveis Globais
 	loadn r0, #48
-	store Pontos, r0	; zera contador de Pontos
+	store Pontos, r0			; zera contador de Pontos
 	loadn r1, #555
-	store cabecaPosition, r1 	; posicao inicial do alvo
+	store cabecaPosition, r1 		; posicao inicial do alvo
 
 	nova_fase:
+		; setar valores iniciais
 		loadn r0, #603
-		store posPaia, r0	; Zera Posicao Atual do paia
+		store posPaia, r0		; Seta posicao inicial do paia
 		loadn r0, #0
 		store forcaUtilizada, r0 	; zera forca utilizada
 		store framePaia, r0
+
+		; desenhar cenario e alvo
 		call printScreenScreen
 		call printcabeca
 
@@ -133,22 +160,21 @@ main:
 		call Imprimestr
 		call selecionaAngulo
 
+		; loop de movimento
 		em_movimento:
 			call movimentaPaia
-
 			call verificaPosicao
-
 			call delay
+			jmp em_movimento
+		; fim em_movimento
 
-		jmp em_movimento
-
-	jmp nova_fase
+		jmp nova_fase
+	; fim nova_fase
 
 	halt	; Nunca chega aqui !!! Mas nao custa nada colocar!!!!
+; fim main
 	
 ;---- Fim do Programa Principal -----
-
-
 
 
 ;---- Inicio das Subrotinas -----
@@ -172,9 +198,9 @@ movimentaPaia:
 	loadn r5, #2
 	div r6, r3, r5
 	cmp r4, r6
-	jle subir
-	jgr descer
-	jmp andar
+	jle subir 	; subir se forcaUtilizada < metade da forca
+	jgr descer 	; descer se forcaUtilizada > metade da forca
+	jmp andar 	; andar se forcaUtilizada == metade da forca
 	subir:
 		loadn r3, #40
 		sub r0, r0, r3 ; subir
@@ -200,21 +226,24 @@ movimentaPaia:
 		; desenhar o paia
 		load r1, framePaia
 		loadn r2, #4
-		inc r1
+		inc r1 			; framePaia++
 		cmp r1, r2
-		jne movimentaPaia_fim
+		jne movimentaPaia_fim 	; resetar contador se framePaia == 4
 		
 		loadn r1, #0
 
 		movimentaPaia_fim:
-		store framePaia, r1
+		store framePaia, r1 	; salvar framePaia
 
+		; pegar o char no vetor
 		loadn r2, #paias
 		add r1, r1, r2
 		loadi r2, r1
 
+		; printar o paia
 		outchar r2, r0
 
+		; salvar a posicao do paia
 		store posPaia, r0
 
 		pop r0
@@ -272,11 +301,13 @@ espera_input:
 	espera_input_loop:
 		inchar r0			; Le o teclado, se nada for digitado = 255
 		cmp r0, r1			;compara r0 com 255
-		jeq espera_input_loop
+		jeq espera_input_loop 		; voltar pro loop se nada for digitado
+	; fim espera_input_loop
 
 	pop r1
 	pop r0
 	rts
+; fim espera_input
 
 
 espera_input_rand:
@@ -293,21 +324,25 @@ espera_input_rand:
 	espera_input_rand_loop:
 		inc r2
 		cmp r2, r3
-		ceq espera_input_rand_reset
+		ceq espera_input_rand_reset 	; resetar se contador == 20
 		
 		inchar r0			; Le o teclado, se nada for digitado = 255
 		cmp r0, r1			;compara r0 com 255
-		jne espera_input_rand_continue
+		jne espera_input_rand_continue 	; sair do loop se algo for digitado
 		jmp espera_input_rand_loop
+	; fim espera_input_rand_loop
 
 	espera_input_rand_reset:
-		loadn r2, #0
+		loadn r2, #0 			; contador = 0
 		rts
+	; fim espera_input_rand_reset
 
 	espera_input_rand_continue:
+		; pegar a posicao no vetor
 		loadn r0, #pos
 		add r0, r0, r2
 		loadi r2, r0
+		; salvar a posicao
 		store cabecaPosition, r2
 
 		pop r3
@@ -315,8 +350,10 @@ espera_input_rand:
 		pop r1
 		pop r0
 		rts
+	; fim espera_input_rand_continue
+; fim espera_input_rand
 
-errou: ; TODO resetar os pontos ou dar game over
+errou:
 	push r2
 
 	; printar msg de ajuda
@@ -343,8 +380,10 @@ errou: ; TODO resetar os pontos ou dar game over
 	pop r1
 	pop r2
 
+	; esperar por input e reiniciar a fase
 	call espera_input
 	jmp nova_fase
+; fim errou
 
 acertou: ; incrementa a pontuacao e vai pra nova fase
 	push r2
@@ -374,9 +413,10 @@ acertou: ; incrementa a pontuacao e vai pra nova fase
 	pop r1
 	pop r2
 
-
+	; esperar por input e ir pra uma nova fase aleatoria
 	call espera_input_rand
 	jmp nova_fase
+; fim acertou
 
 delay:
 	push r0
@@ -388,12 +428,15 @@ delay:
 		loop_int:
 			dec r1
 			jnz loop_int
+		; fim loop_int
 		dec r0
 		jnz loop_ext
+	;fim loop_ext
 
 	pop r0
 	pop r1
 	rts
+;fim delay
 
 
 selecionaForca:	
@@ -416,34 +459,38 @@ selecionaForca:
 		inc r2 				; char out ++
 		outchar r2, r3 			; printar a forca em 991
 		call delay_input 		; chamar input com delay
-		cmp r0, r7			;compara r0 com 255
-		jeq selecionaForca_Loop_up	; Fica lendo ate' que digite uma tecla valida
+		cmp r0, r7			; compara r0 com 255
+		jeq selecionaForca_Loop_up	; voltar pro loop caso nada seja digitado
 		jmp selecionaForca_fim
+	; fim selecionaForca_Loop_up
 
    	selecionaForca_Loop_down:
-		dec r2
-		dec r4
-		jz selecionaForca_Loop_up
-		outchar r2, r3
-		call delay_input
-		cmp r0, r7			;compara r0 com 255
-		jeq selecionaForca_Loop_down	; Fica lendo ate' que digite uma tecla valida
+		dec r2 				; char out --
+		dec r4 				; valor--
+		jz selecionaForca_Loop_up 	; se for zero, ir pro loop up
+		outchar r2, r3 			; printar a forca em 991
+		call delay_input 		; chamar input com delay
+		cmp r0, r7			; compara r0 com 255
+		jeq selecionaForca_Loop_down	; voltar pro loop caso nada seja digitado
 		jmp selecionaForca_fim
-	
+	; fim selecionaForca_Loop_down
 
 	selecionaForca_fim:
-	loadn r2, #forcas
-	add r2, r2, r4
-	loadi r4, r2
-	store Forca, r4			; Salva a tecla na variavel global "Letra"
+		; pegar a forca no vetor
+		loadn r2, #forcas
+		add r2, r2, r4
+		loadi r4, r2
+		store Forca, r4
 
-	pop r7
-	pop r4
-	pop r3
-	pop r2
-	pop r1
-	pop r0
-	rts
+		pop r7
+		pop r4
+		pop r3
+		pop r2
+		pop r1
+		pop r0
+		rts
+	; fim selecionaForca_fim
+; fim selecionaForca
 
 delay_input:
 	push r5
@@ -457,12 +504,12 @@ delay_input:
 		delay_input_int:
 			inchar r0			; Le o teclado, se nada for digitado = 255
 			cmp r0, r7			;compara r0 com 255
-			jne delay_input_fim
+			jne delay_input_fim 		; sair se teve input
 			dec r6
-			jnz delay_input_int
+			jnz delay_input_int 		; voltar loop interno
 		; fim delay_input_int
 		dec r5
-		jz delay_input_fim
+		jz delay_input_fim 			; quebrar loop externo
 		jmp delay_input_ext
 	; fim delay_input_ext
 	delay_input_fim:
@@ -481,10 +528,10 @@ selecionaAngulo:
 	push r4
 	push r7
 	loadn r7, #255
-	loadn r1, #3 	; limite maximo do angulo -1
-	loadn r2, #49 	; 1 em ascii
+	loadn r1, #3 		; limite maximo do angulo -1
+	loadn r2, #49 		; 1 em ascii
 	loadn r3, #1031 	; posicao do angulo
-	loadn r4, #1 	; valor do angulo
+	loadn r4, #1 		; valor do angulo
 
    	selecionaAngulo_Loop_up:
 		cmp r4, r1
@@ -496,6 +543,7 @@ selecionaAngulo:
 		cmp r0, r7			;compara r0 com 255
 		jeq selecionaAngulo_Loop_up	; Fica lendo ate' que digite uma tecla valida
 		jmp selecionaAngulo_fim
+	; fim selecionaAngulo_Loop_up
 
    	selecionaAngulo_Loop_down:
 		dec r2
@@ -506,19 +554,26 @@ selecionaAngulo:
 		cmp r0, r7			;compara r0 com 255
 		jeq selecionaAngulo_Loop_down	; Fica lendo ate' que digite uma tecla valida
 		jmp selecionaAngulo_fim
-	
+	; fim selecionaAngulo_Loop_down
 
 	selecionaAngulo_fim:
-	store Angulo, r4			; Salva a tecla na variavel global "Letra"
+		;salvar angulo
+		store Angulo, r4
 
-	pop r7
-	pop r4
-	pop r3
-	pop r2
-	pop r1
-	pop r0
-	rts
+		pop r7
+		pop r4
+		pop r3
+		pop r2
+		pop r1
+		pop r0
+		rts
+	; fim selecionaAngulo_fim
+; fim selecionaAngulo
 
+;---- Fim das Subrotinas -----
+
+
+;---- Inicio das funcoes pegas prontas -----
 
 Imprimestr:		;  Rotina de Impresao de Mensagens:    
 				; r0 = Posicao da tela que o primeiro caractere da mensagem sera' impresso
