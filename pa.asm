@@ -47,10 +47,10 @@ forcas: var #9
 	static forcas + #9, #60
 
 paias: var #4
-	static paias + #1, '|'
-	static paias + #2, '/'
-	static paias + #3, '-'
-	static paias + #4, '\'
+	static paias + #1, #124 	;'|'
+	static paias + #2, #47 		;'/'
+	static paias + #3, #45 		;'-'
+	static paias + #4, #92 		;'\'
 	
 
 Angulo: var #1 		; angulo escolhido pelo usuario
@@ -189,10 +189,10 @@ movimentaPaia:
 		load r5, Angulo
 		add r0, r0, r5 ; andar pra frente
 		add r4, r4, r5 ; gastar forca
-		jmp continue
+		jmp movimentaPaia_continue
 	; fim andar
 
-	continue:
+	movimentaPaia_continue:
 		store forcaUtilizada, r4
 
 		; desenhar o paia
@@ -247,33 +247,58 @@ verificaPosicao:
 
 	rts
 
+
 espera_input:
+	push r0
+	push r1
+	
+	loadn r1, #255
+	espera_input_loop:
+		inchar r0			; Le o teclado, se nada for digitado = 255
+		cmp r0, r1			;compara r0 com 255
+		jeq espera_input_loop
+
+	pop r1
+	pop r0
+	rts
+
+
+espera_input_rand:
 	push r0
 	push r1
 	push r2
 	push r3
 
-	loadn r2, #pos
-	loadi r3, r2
-	
+	; limite do vetor de posicoes
+	loadn r2, #0
+	loadn r3, #20
+
 	loadn r1, #255
-	espera_input_loop:
+	espera_input_rand_loop:
 		inc r2
-		jnz espera_input_loop_skip
-			loadn r2, #pos
+		cmp r2, r3
+		ceq espera_input_rand_reset
 		
-		espera_input_loop_skip:
-			inchar r0			; Le o teclado, se nada for digitado = 255
-			cmp r0, r1			;compara r0 com 255
-			jeq espera_input_loop
+		inchar r0			; Le o teclado, se nada for digitado = 255
+		cmp r0, r1			;compara r0 com 255
+		jne espera_input_rand_continue
+		jmp espera_input_rand_loop
 
-	store posPaia, r2
+	espera_input_rand_reset:
+		loadn r2, #0
+		rts
 
-	pop r3
-	pop r2
-	pop r1
-	pop r0
-	rts
+	espera_input_rand_continue:
+		loadn r0, #pos
+		add r0, r0, r2
+		loadi r2, r0
+		store cabecaPosition, r2
+
+		pop r3
+		pop r2
+		pop r1
+		pop r0
+		rts
 
 errou: ; TODO resetar os pontos ou dar game over
 	push r2
@@ -291,6 +316,12 @@ errou: ; TODO resetar os pontos ou dar game over
 
 	loadn r0, #48
 	store Pontos, r0 	; pontos = 0
+
+	; desenhar expressao
+	call apagarcabeca
+	load r0, cabecaPosition
+	store cabecatristePosition, r0
+	call printcabecatriste
 
 	pop r0
 	pop r1
@@ -317,11 +348,18 @@ acertou: ; incrementa a pontuacao e vai pra nova fase
 	inc r0
 	store Pontos, r0 	; pontos++
 
+	; desenhar expressao
+	call apagarcabeca
+	load r0, cabecaPosition
+	store cabecapaiaPosition, r0
+	call printcabecapaia
+
 	pop r0
 	pop r1
 	pop r2
 
-	call espera_input
+
+	call espera_input_rand
 	jmp nova_fase
 
 delay:
@@ -615,13 +653,241 @@ apagarcabeca:
   rts
 
 
+cabecapaiaPosition : var #1
+
+cabecapaia : var #16
+  static cabecapaia + #0, #2833 ;   
+  static cabecapaia + #1, #2844 ;   
+  static cabecapaia + #2, #2842 ;   
+  static cabecapaia + #3, #2833 ;   
+  ;37  espacos para o proximo caractere
+  static cabecapaia + #4, #20 ;   
+  static cabecapaia + #5, #27 ;   
+  static cabecapaia + #6, #29 ;   
+  ;38  espacos para o proximo caractere
+  static cabecapaia + #7, #2067 ;   
+  static cabecapaia + #8, #10 ;   
+  static cabecapaia + #9, #95 ;   _~
+  ;39  espacos para o proximo caractere
+  static cabecapaia + #10, #24 ;   
+  static cabecapaia + #11, #21 ;   
+  ;38  espacos para o proximo caractere
+  static cabecapaia + #12, #1052 ;   
+  static cabecapaia + #13, #1119 ;   _~
+  static cabecapaia + #14, #1119 ;   _~
+  static cabecapaia + #15, #1050 ;   
+
+cabecapaiaGaps : var #16
+  static cabecapaiaGaps + #0, #0
+  static cabecapaiaGaps + #1, #0
+  static cabecapaiaGaps + #2, #0
+  static cabecapaiaGaps + #3, #0
+  static cabecapaiaGaps + #4, #36
+  static cabecapaiaGaps + #5, #0
+  static cabecapaiaGaps + #6, #0
+  static cabecapaiaGaps + #7, #37
+  static cabecapaiaGaps + #8, #0
+  static cabecapaiaGaps + #9, #0
+  static cabecapaiaGaps + #10, #38
+  static cabecapaiaGaps + #11, #0
+  static cabecapaiaGaps + #12, #37
+  static cabecapaiaGaps + #13, #0
+  static cabecapaiaGaps + #14, #0
+  static cabecapaiaGaps + #15, #0
+
+printcabecapaia:
+  push R0
+  push R1
+  push R2
+  push R3
+  push R4
+  push R5
+  push R6
+
+  loadn R0, #cabecapaia
+  loadn R1, #cabecapaiaGaps
+  load R2, cabecapaiaPosition
+  loadn R3, #16 ;tamanho cabecapaia
+  loadn R4, #0 ;incremetador
+
+  printcabecapaiaLoop:
+    add R5,R0,R4
+    loadi R5, R5
+
+    add R6,R1,R4
+    loadi R6, R6
+
+    add R2, R2, R6
+
+    outchar R5, R2
+
+    inc R2
+     inc R4
+     cmp R3, R4
+    jne printcabecapaiaLoop
+
+  pop R6
+  pop R5
+  pop R4
+  pop R3
+  pop R2
+  pop R1
+  pop R0
+  rts
+
+apagarcabecapaia:
+  push R0
+  push R1
+  push R2
+  push R3
+  push R4
+  push R5
+
+  loadn R0, #3967
+  loadn R1, #cabecapaiaGaps
+  load R2, cabecapaiaPosition
+  loadn R3, #16 ;tamanho cabecapaia
+  loadn R4, #0 ;incremetador
+
+  apagarcabecapaiaLoop:
+    add R5,R1,R4
+    loadi R5, R5
+
+    add R2,R2,R5
+    outchar R0, R2
+
+    inc R2
+     inc R4
+     cmp R3, R4
+    jne apagarcabecapaiaLoop
+
+  pop R5
+  pop R4
+  pop R3
+  pop R2
+  pop R1
+  pop R0
+  rts
+
+cabecatristePosition : var #1
+
+cabecatriste : var #14
+  static cabecatriste + #0, #2833 ;   
+  static cabecatriste + #1, #2844 ;   
+  static cabecatriste + #2, #2842 ;   
+  static cabecatriste + #3, #2833 ;   
+  ;38  espacos para o proximo caractere
+  static cabecatriste + #4, #27 ;   
+  static cabecatriste + #5, #29 ;   
+  ;39  espacos para o proximo caractere
+  static cabecatriste + #6, #18 ;   
+  static cabecatriste + #7, #95 ;   _~
+  ;39  espacos para o proximo caractere
+  static cabecatriste + #8, #24 ;   
+  static cabecatriste + #9, #21 ;   
+  ;38  espacos para o proximo caractere
+  static cabecatriste + #10, #1052 ;   
+  static cabecatriste + #11, #1119 ;   _~
+  static cabecatriste + #12, #1119 ;   _~
+  static cabecatriste + #13, #1050 ;   
+
+cabecatristeGaps : var #14
+  static cabecatristeGaps + #0, #0
+  static cabecatristeGaps + #1, #0
+  static cabecatristeGaps + #2, #0
+  static cabecatristeGaps + #3, #0
+  static cabecatristeGaps + #4, #37
+  static cabecatristeGaps + #5, #0
+  static cabecatristeGaps + #6, #38
+  static cabecatristeGaps + #7, #0
+  static cabecatristeGaps + #8, #38
+  static cabecatristeGaps + #9, #0
+  static cabecatristeGaps + #10, #37
+  static cabecatristeGaps + #11, #0
+  static cabecatristeGaps + #12, #0
+  static cabecatristeGaps + #13, #0
+
+printcabecatriste:
+  push R0
+  push R1
+  push R2
+  push R3
+  push R4
+  push R5
+  push R6
+
+  loadn R0, #cabecatriste
+  loadn R1, #cabecatristeGaps
+  load R2, cabecatristePosition
+  loadn R3, #14 ;tamanho cabecatriste
+  loadn R4, #0 ;incremetador
+
+  printcabecatristeLoop:
+    add R5,R0,R4
+    loadi R5, R5
+
+    add R6,R1,R4
+    loadi R6, R6
+
+    add R2, R2, R6
+
+    outchar R5, R2
+
+    inc R2
+     inc R4
+     cmp R3, R4
+    jne printcabecatristeLoop
+
+  pop R6
+  pop R5
+  pop R4
+  pop R3
+  pop R2
+  pop R1
+  pop R0
+  rts
+
+apagarcabecatriste:
+  push R0
+  push R1
+  push R2
+  push R3
+  push R4
+  push R5
+
+  loadn R0, #3967
+  loadn R1, #cabecatristeGaps
+  load R2, cabecatristePosition
+  loadn R3, #14 ;tamanho cabecatriste
+  loadn R4, #0 ;incremetador
+
+  apagarcabecatristeLoop:
+    add R5,R1,R4
+    loadi R5, R5
+
+    add R2,R2,R5
+    outchar R0, R2
+
+    inc R2
+     inc R4
+     cmp R3, R4
+    jne apagarcabecatristeLoop
+
+  pop R5
+  pop R4
+  pop R3
+  pop R2
+  pop R1
+  pop R0
+  rts
+
 
 Screen : var #1200
   ;Linha 0
-  static Screen + #0, #3967
-  static Screen + #1, #3967
-  static Screen + #2, #3967
-  static Screen + #3, #3967
+  static Screen + #0, #127
+  static Screen + #1, #1824
+  static Screen + #2, #1824
+  static Screen + #3, #1824
   static Screen + #4, #3967
   static Screen + #5, #3967
   static Screen + #6, #3967
@@ -660,7 +926,7 @@ Screen : var #1200
   static Screen + #39, #3967
 
   ;Linha 1
-  static Screen + #40, #3967
+  static Screen + #40, #127
   static Screen + #41, #1824
   static Screen + #42, #1824
   static Screen + #43, #1824
@@ -1293,7 +1559,7 @@ Screen : var #1200
   static Screen + #640, #3967
   static Screen + #641, #3967
   static Screen + #642, #6
-  static Screen + #643, #47
+  static Screen + #643, #12
   static Screen + #644, #3967
   static Screen + #645, #3967
   static Screen + #646, #3967
