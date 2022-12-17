@@ -47,11 +47,12 @@ forcas: var #9
 	static forcas + #9, #60
 
 paias: var #4
-	static paias + #1, #124 	;'|'
-	static paias + #2, #47 		;'/'
-	static paias + #3, #45 		;'-'
-	static paias + #4, #92 		;'\'
+	static paias + #0, #124 	;'|'
+	static paias + #1, #47 		;'/'
+	static paias + #2, #45 		;'-'
+	static paias + #3, #92 		;'\'
 	
+framePaia: var #1
 
 Angulo: var #1 		; angulo escolhido pelo usuario
 cabecaPosition: var #1 	; posicao do alvo
@@ -102,6 +103,7 @@ main:
 		store posPaia, r0	; Zera Posicao Atual do paia
 		loadn r0, #0
 		store forcaUtilizada, r0 	; zera forca utilizada
+		store framePaia, r0
 		call printScreenScreen
 		call printcabeca
 
@@ -196,7 +198,21 @@ movimentaPaia:
 		store forcaUtilizada, r4
 
 		; desenhar o paia
-		loadn r2, #'|'
+		load r1, framePaia
+		loadn r2, #4
+		inc r1
+		cmp r1, r2
+		jne movimentaPaia_fim
+		
+		loadn r1, #0
+
+		movimentaPaia_fim:
+		store framePaia, r1
+
+		loadn r2, #paias
+		add r1, r1, r2
+		loadi r2, r1
+
 		outchar r2, r0
 
 		store posPaia, r0
