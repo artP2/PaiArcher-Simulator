@@ -447,16 +447,16 @@ selecionaForca:
 	push r4
 	push r7
 	loadn r7, #255 	; char null
-	loadn r1, #9 	; limite maximo da forca
+	loadn r1, #10 	; limite maximo da forca
 	loadn r2, #48 	; 1 em ascii
 	loadn r3, #991 	; posicao do forca
 	loadn r4, #0 	; valor do forca
 
    	selecionaForca_Loop_up:
-		cmp r4, r1
-		jeq selecionaForca_Loop_down 	; if (valor == limite) jmp loop down 
 		inc r4 				; valor++
 		inc r2 				; char out ++
+		cmp r4, r1
+		jeq selecionaForca_Loop_down 	; if (valor == limite) jmp loop down 
 		outchar r2, r3 			; printar a forca em 991
 		call delay_input 		; chamar input com delay
 		cmp r0, r7			; compara r0 com 255
