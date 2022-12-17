@@ -47,14 +47,36 @@ forcas: var #9
 	static forcas + #9, #60
 
 paias: var #4
-	static forcas + #1, '|'
-	static forcas + #2, '/'
-	static forcas + #3, '-'
-	static forcas + #4, '\'
+	static paias + #1, '|'
+	static paias + #2, '/'
+	static paias + #3, '-'
+	static paias + #4, '\'
 	
 
 Angulo: var #1 		; angulo escolhido pelo usuario
 cabecaPosition: var #1 	; posicao do alvo
+
+pos: var #20 ; das linhas 0 a 19 e colunas 20 a 39
+	static pos + #0, #555
+	static pos + #1, #551
+	static pos + #2, #547
+	static pos + #3, #543
+	static pos + #4, #475
+	static pos + #5, #471
+	static pos + #6, #467
+	static pos + #7, #463
+	static pos + #8, #395
+	static pos + #9, #391
+	static pos + #10, #387
+	static pos + #11, #383
+	static pos + #12, #315
+	static pos + #13, #311
+	static pos + #14, #307
+	static pos + #15, #303
+	static pos + #16, #235
+	static pos + #17, #231
+	static pos + #18, #227
+	static pos + #19, #223
 
 ; Mensagens que serao impressas na tela
 Msn1: string "Aperte uma tecla para jogar           "
@@ -228,13 +250,27 @@ verificaPosicao:
 espera_input:
 	push r0
 	push r1
+	push r2
+	push r3
+
+	loadn r2, #pos
+	loadi r3, r2
 	
 	loadn r1, #255
 	espera_input_loop:
-		inchar r0			; Le o teclado, se nada for digitado = 255
-		cmp r0, r1			;compara r0 com 255
-		jeq espera_input_loop
+		inc r2
+		jnz espera_input_loop_skip
+			loadn r2, #pos
+		
+		espera_input_loop_skip:
+			inchar r0			; Le o teclado, se nada for digitado = 255
+			cmp r0, r1			;compara r0 com 255
+			jeq espera_input_loop
 
+	store posPaia, r2
+
+	pop r3
+	pop r2
 	pop r1
 	pop r0
 	rts
